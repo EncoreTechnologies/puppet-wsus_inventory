@@ -1,0 +1,33 @@
+{
+  "description": "Generate targets from WSUS SQL Server",
+  "files": ["ruby_task_helper/files/task_helper.rb"],
+  "input_method": "stdin",
+  "parameters": {
+    "host": {
+      "description" : "Hostname/IP of the WSUS SQL Server database.",
+      "type": "String[1]"
+    },
+    "port": {
+      "description" : "Port to connect to the database on. Default = 1433",
+      "type": "Optional[Integer]"
+    },
+    "database": {
+      "description" : "Name of the WSUS database. Default = SUSDB",
+      "type": "Optional[String[1]]"
+    },
+    "username": {
+      "description" : "Username for authentication to the database.",
+      "type": "String[1]"
+    },
+    "password": {
+      "description" : "Password for authentication to the database.",
+      "type": "String[1]",
+      "sensitive": true
+    },
+    "group": {
+      "description" : "Return only computers that are a member of this WSUS group.",
+      "type": "Optional[String[1]]",
+      "sensitive": true
+    }
+  }
+}
