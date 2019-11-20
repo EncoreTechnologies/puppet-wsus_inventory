@@ -74,6 +74,13 @@ class WsusInventory < TaskHelper
       table = table.where { lastreportedstatustime > filter_older_than_time_s }
     end
 
+    # ignore hosts that match a list of hostnames that the user passed us
+    # this is good when troubleshooting problem hosts, they can be explicitly
+    # excluded and revisited later
+    if opts[:ignore_dns_hostnames]
+      table = table.exclude(fulldomainname: opts[:ignore_dns_hostnames])
+    end
+
     dataset = table.all
     dataset.map do |row|
       { uri: row[:fulldomainname] }

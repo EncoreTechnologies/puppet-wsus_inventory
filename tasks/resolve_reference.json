@@ -31,6 +31,10 @@
     "filter_older_than_days": {
       "description" : "Filters out hosts that haven't reported in within the last N days. This uses the LastReportedStatusTime property on the ComputerTarget object to compare against.",
       "type": "Optional[Integer]"
+    },
+    "ignore_dns_hostnames": {
+      "description" : "Array of computer DNS Hostnames to ignore. These hosts will be excluded from the results",
+      "type": "Optional[Array[String]]"
     }
   }
 }
