@@ -26,8 +26,11 @@
     },
     "group": {
       "description" : "Return only computers that are a member of this WSUS group.",
-      "type": "Optional[String[1]]",
-      "sensitive": true
+      "type": "Optional[String[1]]"
+    },
+    "filter_older_than_days": {
+      "description" : "Filters out hosts that haven't reported in within the last N days. This uses the LastReportedStatusTime property on the ComputerTarget object to compare against.",
+      "type": "Optional[Integer]"
     }
   }
 }

@@ -9,6 +9,7 @@ task_helper = [
 raise 'Could not find the Bolt ruby_task_helper' if task_helper.nil?
 require_relative task_helper
 
+require 'date'
 require 'sequel'
 require 'tiny_tds'
 
@@ -61,6 +62,18 @@ class WsusInventory < TaskHelper
               ### Get all computers
               db[:tbComputerTarget].order(:fulldomainname)
             end
+
+    # filter out hosts that haven't synced in the last N days using
+    # the LastReportedStatusTime field
+    if opts[:filter_older_than_days]
+      # compute absolute time based on our "older than" offset
+      filter_older_than_time = (DateTime.now - opts[:filter_older_than_days].to_i).to_time
+      # convert the absolute time to a SQL compatible string
+      filter_older_than_time_s = filter_older_than_time.strftime('%Y-%m-%d %H:%M:%S.%L')
+      # add in our "older than" filter into our WHERE clause
+      table = table.where { lastreportedstatustime > filter_older_than_time_s }
+    end
+
     dataset = table.all
     dataset.map do |row|
       { uri: row[:fulldomainname] }
