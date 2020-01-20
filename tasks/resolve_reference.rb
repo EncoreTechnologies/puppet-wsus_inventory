@@ -17,51 +17,56 @@ require 'tiny_tds'
 class WsusInventory < TaskHelper
 
   def resolve_reference(opts)
-    db_connection_params = {
+    db = connect(opts)
+    format = opts[:format] || 'groups'
+    group_name_prefix = opts[:group_name_prefix] || ''
+    table = build_query(db, opts)
+    dataset = table.all
+    parse_dataset(dataset, format, group_name_prefix)
+  end
+
+  def connect(opts)
+    Sequel.connect(
       adapter: 'tinytds',
       host:     opts[:host],
       port:     opts[:port] || 1433,
       database: opts[:database] || 'SUSDB',
       user:     opts[:username],
       password: opts[:password],
-    }
+    )
+  end
 
-    db = Sequel.connect(db_connection_params)
-
-    ### Get all computers
-    table = if opts[:group]
-              # Get computers that are members of this group
-              # Executes the following SQL query:
-              # SELECT t.[TargetID]
-              #       ,[ComputerID]
-              #       ,[SID]
-              #       ,[LastSyncTime]
-              #       ,[LastReportedStatusTime]
-              #       ,[LastReportedRebootTime]
-              #       ,[IPAddress]
-              #       ,[FullDomainName]
-              #       ,[IsRegistered]
-              #       ,[LastInventoryTime]
-              #       ,[LastNameChangeTime]
-              #       ,[EffectiveLastDetectionTime]
-              #       ,[ParentServerTargetID]
-              #       ,[LastSyncResult]
-              # FROM [SUSDB].[dbo].[tbComputerTarget] as t
-              # LEFT JOIN [SUSDB].[dbo].[tbTargetInTargetGroup] as ttg
-              #   ON t.TargetID = ttg.TargetID
-              # LEFT JOIN [SUSDB].[dbo].[tbTargetGroup] as tg
-              #   ON tg.TargetGroupID = ttg.TargetGroupID
-              # WHERE tg.Name = <your group name here>
-              # ORDER BY t.FullDomainName
-              db[:tbComputerTarget]
-                .left_join(:tbTargetInTargetGroup, targetid: :targetid)
-                .left_join(:tbTargetGroup, targetgroupid: :targetgroupid)
-                .where(Sequel[:tbTargetGroup][:name] => opts[:group])
-                .order(:fulldomainname)
-            else
-              ### Get all computers
-              db[:tbComputerTarget].order(:fulldomainname)
-            end
+  def build_query(db, opts)
+    # Get computers and their group memberships
+    # Executes the following SQL query:
+    # SELECT t.[TargetID]
+    #       ,[ComputerID]
+    #       ,[SID]
+    #       ,[LastSyncTime]
+    #       ,[LastReportedStatusTime]
+    #       ,[LastReportedRebootTime]
+    #       ,[IPAddress]
+    #       ,[FullDomainName]
+    #       ,[IsRegistered]
+    #       ,[LastInventoryTime]
+    #       ,[LastNameChangeTime]
+    #       ,[EffectiveLastDetectionTime]
+    #       ,[ParentServerTargetID]
+    #       ,[LastSyncResult]
+    # FROM [SUSDB].[dbo].[tbComputerTarget] as t
+    # LEFT JOIN [SUSDB].[dbo].[tbTargetInTargetGroup] as ttg
+    #   ON t.TargetID = ttg.TargetID
+    # LEFT JOIN [SUSDB].[dbo].[tbTargetGroup] as tg
+    #   ON tg.TargetGroupID = ttg.TargetGroupID
+    # WHERE tg.Name = <your group name here>
+    # ORDER BY t.FullDomainName
+    table = db[:tbComputerTarget]
+            .left_join(:tbTargetInTargetGroup, targetid: :targetid)
+            .left_join(:tbTargetGroup, targetgroupid: :targetgroupid)
+            .order(:fulldomainname)
+    if opts[:groups]
+      table = table.where(Sequel[:tbTargetGroup][:name] => opts[:groups])
+    end
 
     # filter out hosts that haven't synced in the last N days using
     # the LastReportedStatusTime field
@@ -81,15 +86,40 @@ class WsusInventory < TaskHelper
       table = table.exclude(fulldomainname: opts[:ignore_dns_hostnames])
     end
 
-    dataset = table.all
-    dataset.map do |row|
-      { uri: row[:fulldomainname] }
+    table
+  end
+
+  def parse_dataset(dataset, format, group_name_prefix)
+    if format == 'groups'
+      groups = {}
+      dataset.each do |row|
+        group_name = normalize_group_name(group_name_prefix + row[:name])
+        unless groups.key?(group_name)
+          groups[group_name] = {
+            name: group_name,
+            targets: [],
+          }
+        end
+        groups[group_name][:targets] << { uri: row[:fulldomainname] }
+      end
+      groups.values
+    elsif format == 'targets'
+      targets = dataset.map do |row|
+        { uri: row[:fulldomainname] }
+      end
+      targets
+    else
+      raise TaskHelper::Error.new("Unknown format: #{format}", 'bad/data')
     end
   end
 
+  def normalize_group_name(name)
+    name.downcase!
+  end
+
   def task(opts)
-    targets = resolve_reference(opts)
-    return { value: targets }
+    data = resolve_reference(opts)
+    return { value: data }
   rescue TaskHelper::Error => e
     # ruby_task_helper doesn't print errors under the _error key, so we have to
     # handle that ourselves

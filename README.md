@@ -56,49 +56,52 @@ sudo apt-get -y install freetds-bin freetds-dev
 /opt/puppetlabs/bolt/bin/gem install sequel tiny_tds
 ```
 
-### Beginning with wsus_inventory
+### Example usage in inventory
 
-The very basic steps needed for a user to get the module up and running. This can include setup steps, if necessary, or it can be an example of the most basic use of the module.
+Dynamically grab computers from WSUS
 
-## Usage
+``` yaml
+---
+version: 2.0
 
-Include usage examples for common use cases in the **Usage** section. Show your users how to use your module to solve problems, and be sure to include code examples. Include three to five examples of the most important or common tasks a user can accomplish with your module. Show users how to accomplish more complex tasks that involve different types, classes, and functions working in tandem.
-
-## Reference
-
-This section is deprecated. Instead, add reference information to your code as Puppet Strings comments, and then use Strings to generate a REFERENCE.md in your module. For details on how to add code comments and generate documentation with Strings, see the Puppet Strings [documentation](https://puppet.com/docs/puppet/latest/puppet_strings.html) and [style guide](https://puppet.com/docs/puppet/latest/puppet_strings_style.html)
-
-If you aren't ready to use Strings yet, manually create a REFERENCE.md in the root of your module directory and list out each of your module's classes, defined types, facts, functions, Puppet tasks, task plans, and resource types and providers, along with the parameters for each.
-
-For each element (class, defined type, function, and so on), list:
-
-  * The data type, if applicable.
-  * A description of what the element does.
-  * Valid values, if the data type doesn't make it obvious.
-  * Default value, if any.
-
-For example:
+groups:
+  - name: windows_wsus
+    config:
+      transport: winrm
+      winrm:
+        user: xxx
+        password:
+          _plugin: pkcs7
+          encrypted_value: ENC[PKCS7,xxx]
+        ssl: true
+        ssl-verify: false
+    vars:
+      patching_order: 1
+    groups:
+      # grabs a list of groups from WSUS
+      - _plugin: wsus_inventory
+        # creds to login to the WSUS MSSQL database
+        host: wsus.domain.tld
+        database: 'SUSDB'
+        username: DOMAIN\svc_wsus_bolt
+        password:
+          _plugin: pkcs7
+          encrypted_value: ENC[PKCS7,xxx]
+        # return a list of 'groups', this could also be 'targets'
+        format: 'groups'
+        # names of groups to extract from WSUS, these need to match exactly what is in WSUS
+        # note: this will be downcased when returned because Bolt only allows lowercase names
+        groups:
+          - Servers_A
+          - Servers_B
+          - Servers_A_EDR
+          - Servers_B_EDR
+          - Servers_HV
+        # remove hosts that haven't checked into WSUS in the last N days
+        filter_older_than_days: 1
+        # insert windows_wsus_ before the group names we get from WSUS
+        # so we will get groups like: windows_wsus_servers_a
+        group_name_prefix: 'windows_wsus_'
 
 ```
-### `pet::cat`
 
-#### Parameters
-
-##### `meow`
-
-Enables vocalization in your cat. Valid options: 'string'.
-
-Default: 'medium-loud'.
-```
-
-## Limitations
-
-In the Limitations section, list any incompatibilities, known issues, or other warnings.
-
-## Development
-
-In the Development section, tell other users the ground rules for contributing to your project and how they should submit their work.
-
-## Release Notes/Contributors/Etc. **Optional**
-
-If you aren't using changelog, put your release notes here (though you should consider using changelog). You can also add any additional sections you feel are necessary or important to include here. Please use the `## ` header.

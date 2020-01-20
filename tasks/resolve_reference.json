@@ -24,9 +24,13 @@
       "type": "String[1]",
       "sensitive": true
     },
-    "group": {
-      "description" : "Return only computers that are a member of this WSUS group.",
-      "type": "Optional[String[1]]"
+    "format": {
+      "description" : "Determine the output format to return. 'targets' will return a list of targets (default). 'groups' will return a list of groups, each group having a list of targets that are members of that group in WSUS. The name of the groups returned will be the group names in WSUS.",
+      "type": "Optional[Enum['targets', 'groups']]"
+    },
+    "groups": {
+      "description" : "Return only groups/targets that are a member of these WSUS group(s).",
+      "type": "Optional[Array[String[1]]]"
     },
     "filter_older_than_days": {
       "description" : "Filters out hosts that haven't reported in within the last N days. This uses the LastReportedStatusTime property on the ComputerTarget object to compare against.",
@@ -34,7 +38,11 @@
     },
     "ignore_dns_hostnames": {
       "description" : "Array of computer DNS Hostnames to ignore. These hosts will be excluded from the results",
-      "type": "Optional[Array[String]]"
+      "type": "Optional[Array[String[1]]]"
+    },
+    "group_name_prefix": {
+      "description" : "Prefix that will be added to all group names in the output (helps to make the groups unique)",
+      "type": "Optional[String[1]]"
     }
   }
 }
