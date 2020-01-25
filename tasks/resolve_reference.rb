@@ -16,6 +16,8 @@ require 'tiny_tds'
 # Retrieves hosts from the WSUS SQL server
 class WsusInventory < TaskHelper
 
+  NAME_REGEX = /[^a-z0-9_]/.freeze
+
   def resolve_reference(opts)
     db = connect(opts)
     format = opts[:format] || 'groups'
@@ -115,6 +117,7 @@ class WsusInventory < TaskHelper
 
   def normalize_group_name(name)
     name.downcase!
+    name.gsub(NAME_REGEX, '_')
   end
 
   def task(opts)
