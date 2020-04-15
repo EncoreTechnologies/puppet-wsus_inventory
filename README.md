@@ -1,5 +1,13 @@
 # wsus_inventory
 
+[![Build Status](https://travis-ci.org/EncoreTechnologies/puppet-wsus_inventory.svg?branch=master)](https://travis-ci.org/EncoreTechnologies/puppet-wsus_inventory)
+[![Puppet Forge Version](https://img.shields.io/puppetforge/v/encore/wsus_inventory.svg)](https://forge.puppet.com/encore/wsus_inventory)
+[![Puppet Forge Downloads](https://img.shields.io/puppetforge/dt/encore/wsus_inventory.svg)](https://forge.puppet.com/encore/wsus_inventory)
+[![Puppet Forge Score](https://img.shields.io/puppetforge/f/encore/wsus_inventory.svg)](https://forge.puppet.com/encore/wsus_inventory)
+[![Puppet PDK Version](https://img.shields.io/puppetforge/pdk-version/encore/wsus_inventory.svg)](https://forge.puppet.com/encore/wsus_inventory)
+[![puppetmodule.info docs](http://www.puppetmodule.info/images/badge.png)](http://www.puppetmodule.info/m/encore-wsus_inventory)
+
+
 Welcome to your new module. A short overview of the generated parts can be found in the PDK documentation at https://puppet.com/pdk/latest/pdk_generating_modules.html .
 
 The README template below provides a starting point with details about what information to include in your README.
