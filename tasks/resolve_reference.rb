@@ -15,8 +15,7 @@ require 'tiny_tds'
 
 # Retrieves hosts from the WSUS SQL server
 class WsusInventory < TaskHelper
-
-  NAME_REGEX = /[^a-z0-9_]/.freeze
+  NAME_REGEX = %r{[^a-z0-9_]}
 
   def resolve_reference(opts)
     db = connect(opts)
