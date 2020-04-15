@@ -5,7 +5,11 @@
   "summary": "Bolt inventory plugin for dynamically retrieving groups and targets from Microsoft WSUS (Windows Server Update Services)",
   "license": "Apache-2.0",
   "source": "https://github.com/EncoreTechnologies/puppet-wsus_inventory",
-  "dependencies": [],
+  "project_page": "https://github.com/EncoreTechnologies/puppet-wsus_inventory",
+  "issues_url": "https://github.com/EncoreTechnologies/puppet-wsus_inventory/issues",
+  "dependencies": [
+
+  ],
   "operatingsystem_support": [
     {
       "operatingsystem": "CentOS",
