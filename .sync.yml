@@ -1,12 +1,14 @@
 ---
 .gitignore:
   paths:
+    - .rerun.json
     - .librarian
     - .kitchen
-    - .ruby-version
     - .tmp
     - .bundle
+    - bolt.log
     - Puppetfile.lock
+    - modules
 .gitlab-ci.yml:
   # we don't use GitLab
   unmanaged: true
@@ -37,4 +39,21 @@ Gemfile:
       - gem: 'puppet-lint-unquoted_string-check'
         version: '>= 0.3.0'
       - gem: 'puppet-lint-version_comparison-check'
-        version: '>= 0.2.1' 
+        version: '>= 0.2.1'
+      - gem: 'r10k'
+        version: '>= 3.0.0'
+      # cri is needed by r10k, but due to a bug in the cri gem v2.15.7 it breaks r10k
+      # see: https://github.com/puppetlabs/r10k/issues/930
+      - gem: 'cri'
+        version: '2.15.6'
+      - gem: 'yaml-lint'
+        version: '>= 0.0.10'
+# Rakefile:
+#   extras:
+#     - "# exclude plans because puppet-syntax doesn't support them yet: https://github.com/voxpupuli/puppet-syntax/issues/95"
+#     - 'PuppetSyntax.exclude_paths = ["plans/**/*", "vendor/**/*"]'
+.travis.yml:
+  deploy_to_forge:
+    enabled: true
+  user: encore
+  secure: "EucVd6vNGqaEYsFz6lCnV2p8fE6jVEpIE0QIL9nxHm1mDQoXAxZl5/wFILzxd0s5D+4Fp5thU7EnBXk9z/r9ehO5ipaXzOKyL2XGnnb+uyWa/CWPfazI0VzzYaQ0On3IRTGxjmsPLkPyc13W0nvNrUUhXTOogjXk2a9j2bZ5yOCccXHv1sZ9GIM7vdh2C9TEWPaji8madnxjrJ42MyXabIeRWovehzvDo8BFxTmN9XkbVf/4pFC/Zba6lT/bkfI5fWiJwUhVfRpwb46SpA5zOuSEVA+Ny6+m8YWleMjC7lQbuSYeFrcrGIo6TWDUdU5XwtgsfdGJaiv+qZGbDZ7cc8Iy7q32xwv0RspFRRS+Pn6ODHsDcZZG8u2acppJ69WnCltEv1OVqsEaPHpVyFY3looZ6WcOCLNZV9toxGlr6caNDSLh5oxoaVD+W70Ovn88+eVJzKokLemTSCqPM/70jrEHyd98/tZO4Xbi8lJRYKJ2b6U2vkKGGXyUkScRCsYRYR/0n7Bq0tMSTTr0uTfJeQZ91+8m52qwwG0aYUKLKEmJjb3IuTYuDqYRCJhVqBBV4KHGQcV9xHNueQqpQ/PX7Jhnta/7gBsKKVFJF0rEXN8yUzbpR6EZuQh926bC896vIhpGMmNc4EX/G7U5gzhDgmUm0PBUist1D2A4EuZ3WkY="
